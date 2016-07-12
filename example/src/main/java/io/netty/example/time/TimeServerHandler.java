@@ -13,41 +13,38 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package io.netty.example.echo;
+package io.netty.example.time;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
- * Handler implementation for the echo server.
+ * Handles a server-side channel.
  */
 @Sharable
-public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-    	ByteBuf in  = (ByteBuf) msg;
-    	try{
-    		while (in.isReadable()){
-    			System.out.println((char)in.readByte());
-    			System.out.flush();
-    		}
-    	}
-    	finally {
-    		ctx.write(msg);
-    	}
-    }
+    public void channelActive(final ChannelHandlerContext ctx) {
+    	 final ByteBuf time = ctx.alloc().buffer(4); // (2)
+         time.writeInt((int) (System.currentTimeMillis() / 1000L + 2208988800L));
 
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.flush();
+         final ChannelFuture f = ctx.writeAndFlush(time); // (3)
+         f.addListener(new ChannelFutureListener() {
+             @Override
+             public void operationComplete(ChannelFuture future) {
+                 assert f == future;
+                 ctx.close();
+             }
+         }); // (4)
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        // Close the connection when an exception is raised.
         cause.printStackTrace();
         ctx.close();
     }

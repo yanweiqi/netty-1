@@ -18,7 +18,7 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
             System.out.println(sdf.format(new Date(currentTimeMillis)));
             ctx.close();
         } finally {
-            m.release();
+           m.release();
         }
     }
 

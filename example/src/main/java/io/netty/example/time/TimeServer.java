@@ -18,17 +18,14 @@ package io.netty.example.time;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.example.echo.EchoServerHandler;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**
  * Time server.
@@ -36,6 +33,10 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 public final class TimeServer {
 
     static final int PORT = Integer.parseInt(System.getProperty("port", "8080"));
+    
+    public static void main(String[] args) throws Exception {
+        new TimeServer().bind();
+    }
     
     private void bind() throws InterruptedException{
     	EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -56,13 +57,11 @@ public final class TimeServer {
     private class childChannelHandler extends ChannelInitializer<SocketChannel>{
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
-             ChannelPipeline p = ch.pipeline();
-             p.addLast(new TimeServerHandler());
+             ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
+             ch.pipeline().addLast(new StringDecoder());
+             ch.pipeline().addLast(new TimeServerHandlerTcp());
 		}
     	
     }
 
-    public static void main(String[] args) throws Exception {
-        new TimeServer().bind();
-    }
 }

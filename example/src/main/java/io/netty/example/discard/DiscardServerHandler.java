@@ -19,7 +19,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
- * Handles a server-side channel.
+ * Handles a server-side channel. <br>
+ * 处理服务端的 channel
+ * 
  */
 public class DiscardServerHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -28,9 +30,13 @@ public class DiscardServerHandler extends SimpleChannelInboundHandler<Object> {
         // discard
     }
 
+    /** 
+	 * Close the connection when an exception is raised.<br>
+	 * 当有异常时关掉连接.
+	 */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        // Close the connection when an exception is raised.
+
         cause.printStackTrace();
         ctx.close();
     }
